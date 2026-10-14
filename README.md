@@ -2,12 +2,13 @@
 An LLM-powered AI agent for natural-language-to-SQL querying, automated statistical analysis, and reliability evaluation.
 
 # Goals:
+```text
 LLM API integration
 Agent tool calling
 SQL execution
 Statistical validation
 Automated testing and evaluation
-
+```
 # Tools:
 GitHub Desktop + VS Code + Python + Jupyter Notebook
 
