@@ -218,3 +218,9 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Generated reports, isolated dependencies, and local credentials
+.venv/
+output/
+.env
+!.env.example
