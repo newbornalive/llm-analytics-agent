@@ -1,0 +1,88 @@
+{
+  "question": "Compare conversion rates by channel",
+  "mode": "demo",
+  "sql": "SELECT event_id, channel, converted FROM marketing_events",
+  "plan_rationale": "Deterministic demo query; no LLM call was made.",
+  "statistics": {
+    "sample_size": 1000,
+    "groups": [
+      {
+        "channel": "Email",
+        "events": 319,
+        "conversions": 30,
+        "rate": 0.09404388714733543,
+        "wilson_95_ci": [
+          0.0666700467263317,
+          0.1310785914253489
+        ]
+      },
+      {
+        "channel": "Paid Search",
+        "events": 354,
+        "conversions": 31,
+        "rate": 0.08757062146892655,
+        "wilson_95_ci": [
+          0.06237786742558442,
+          0.12161830517465562
+        ]
+      },
+      {
+        "channel": "Social",
+        "events": 327,
+        "conversions": 14,
+        "rate": 0.04281345565749235,
+        "wilson_95_ci": [
+          0.025671733140458737,
+          0.07057212618175279
+        ]
+      }
+    ],
+    "omnibus": {
+      "method": "Pearson chi-square",
+      "statistic": 7.3570343662944655,
+      "df": 2,
+      "p_value": 0.02526040363055603,
+      "min_expected_count": 23.925
+    },
+    "pairwise": [
+      {
+        "channels": [
+          "Email",
+          "Paid Search"
+        ],
+        "rate_difference": 0.006473265678408877,
+        "method": "Fisher exact (two-sided)",
+        "p_value": 0.7893716285680086,
+        "holm_adjusted_p": 0.7893716285680086
+      },
+      {
+        "channels": [
+          "Email",
+          "Social"
+        ],
+        "rate_difference": 0.051230431489843076,
+        "method": "Fisher exact (two-sided)",
+        "p_value": 0.0119221443975846,
+        "holm_adjusted_p": 0.0357664331927538
+      },
+      {
+        "channels": [
+          "Paid Search",
+          "Social"
+        ],
+        "rate_difference": 0.0447571658114342,
+        "method": "Fisher exact (two-sided)",
+        "p_value": 0.020541250645014913,
+        "holm_adjusted_p": 0.04108250129002983
+      }
+    ],
+    "multiple_testing_family": "All reported pairwise channel comparisons; omnibus test is reported separately.",
+    "warnings": [
+      "Observational comparison: channel differences do not establish causal effects.",
+      "Unique event IDs do not prove independent subjects; repeated-user dependence cannot be checked without a user identifier.",
+      "Wilson intervals assume independent Bernoulli events and are individual, not simultaneous, 95% intervals."
+    ]
+  },
+  "query_warnings": [],
+  "interpretation": "Compare observed conversion rates and uncertainty; this analysis does not identify causal channel effects."
+}
