@@ -1,10 +1,23 @@
 # LLM Analytics Agent
 
-**A five-stage LangGraph workflow for marketing conversion analysis: question → SQL plan → guarded execution → statistical validation → report.**
+**A reliability-focused LLM analytics prototype: natural-language planning → guarded SQL → deterministic statistical inference → auditable reports.**
+
+[![Python tests](https://github.com/newbornalive/llm-analytics-agent/actions/workflows/test.yml/badge.svg)](https://github.com/newbornalive/llm-analytics-agent/actions/workflows/test.yml)
+
+**Stack:** LangGraph · OpenAI Structured Outputs (optional) · SQLGlot · SQLite · SciPy · FastAPI · pytest
 
 The model proposes a query. Python checks the query, executes it against a read-only database, calculates statistical results, and produces a report with explicit assumptions. A deterministic demo mode runs without an API key.
 
-> **v0.1 scoped prototype:** supports event-level conversion comparisons by marketing channel in the supplied SQLite schema. The demo and 33 automated tests pass locally. OpenAI planning is implemented and mock-tested; live paid calls have not been verified. BIRD/Spider benchmarks, general-purpose analytics and causal inference are not implemented.
+> **Status: v0.1 MVP.** A deliberately scoped portfolio prototype for event-level marketing channel conversion comparisons. The deterministic demo works without an API key; live OpenAI requests have not been verified. The test suite and curated benchmark are not evidence of general-purpose Text-to-SQL accuracy, causal effects, or production readiness.
+
+## What makes this different
+
+- **Separation of responsibilities:** the LLM proposes a plan, while independent Python code validates SQL and computes every reported estimate and hypothesis test.
+- **Defense in depth:** SQLGlot checks the AST; SQLite runs read-only with an authorizer, timeout and row cap. Invalid queries fail closed.
+- **Statistical checks:** binary outcomes and event IDs are validated; individual Wilson intervals, sparse-table safeguards, Fisher tests and Holm-adjusted pairwise p-values make assumptions and uncertainty explicit.
+- **Traceable output:** the report retains the executed SQL, sample size, warnings and statistical results. A reproducible SVG demo illustrates the estimates.
+
+**Scope:** this is a fixed, five-stage workflow for the included marketing-event schema—not a general-purpose autonomous agent or a multi-tenant service.
 
 ## Try it without an API key
 
@@ -95,11 +108,27 @@ Paid HTTP requests additionally require a configured `ANALYTICS_API_TOKEN` of at
 - Report pairwise Fisher tests with Holm correction across the reported pairwise family. The omnibus test is separate.
 - Flag filtered samples and the inability to establish subject independence from event IDs. Repeated-user correlation and selection bias are not automatically resolved.
 
+## Scoped acceptance benchmark
+
+Run the versioned **17-question** evaluation set on the bundled 1,000-event synthetic database:
+
+```sh
+python -m evaluation.benchmark --mode demo --output output/benchmark-demo.json
+```
+
+For optional, paid live model planning (requires `OPENAI_API_KEY` and `OPENAI_MODEL`):
+
+```sh
+python -m evaluation.benchmark --mode openai --output output/benchmark-openai.json
+```
+
+The benchmark separately measures **supported-question end-to-end pass rate**, **unsupported-question rejection rate**, and **overall pass rate**. For supported questions, the executed report must reproduce the expected channel counts and conversions; for unsupported questions, only explicit intent rejections count as successful. Provider failures, unexpected SQL/results, and execution failures count as failures. Its questions are curated against one narrow schema. The demo score measures a deterministic planner with known phrases—not LLM generalisation. OpenAI results must be measured in a separate opt-in run; no live-model score is claimed here. See [evaluation methodology](evaluation/README.md).
+
 ## Tests and evaluation
 
 `python -m pytest -q` covers 33 cases: SQL attacks and unsupported shapes, SQLite defense in depth, data quality, interval/correction reference values, sparse/degenerate outcomes, graph execution, SVG escaping, mocked OpenAI contracts and HTTP authorization.
 
-The suite uses synthetic data and mocked provider responses. It does not measure natural-language query accuracy, model robustness across prompts, or business impact. See [evaluation scope](evaluation/README.md). CI is configured for Python 3.11 and 3.12; live model tests are excluded.
+The suite uses synthetic data and mocked provider responses. It does not measure natural-language query accuracy, model robustness across prompts, or business impact. See [evaluation scope](evaluation/README.md). GitHub Actions runs tests on Python 3.11 and 3.12; live model tests are excluded. The original 33 regression cases are supplemented by benchmark tests.
 
 ## Structure
 
@@ -116,13 +145,13 @@ src/
     chart.py               SVG uncertainty plot
     cli.py / api.py        CLI and FastAPI entry points
  tests/                    Synthetic regression tests
- evaluation/               Evaluation scope and future benchmark notes
+ evaluation/               Versioned scoped benchmark and evaluation notes
  docs/                     Reproducible demo artifacts
 ```
 
 ## Roadmap
 
-- Add versioned natural-language/SQL/expected-result evaluation cases and run opt-in live-model evaluations.
+- Expand the versioned curated evaluation cases and run opt-in live-model evaluations; measure prompt and model variation.
 - Extend metrics only alongside explicit data contracts and statistical tests.
 - Add user-level identifiers and dependence-aware analyses for repeated observations.
 - Add benchmark adapters before reporting BIRD/Spider results.
